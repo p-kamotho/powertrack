@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Tariffs • PowerTrack{% endblock %}
+{% block page_heading %}Tariffs{% endblock %}
+
+{% block content %}
+<div class="bar">
+    <div>
+        <small>MANAGEMENT</small>
+        <p class="muted">Manage tariffs.</p>
+    </div>
+    <a class="btn btn-primary" href="{% url 'tariff_create' %}">+ Add</a>
+</div>
+
+<div class="panel table-responsive">
+    <table class="table table-dark table-hover">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Rate</th>
+                <th>From</th>
+                <th>To</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for x in tariffs %}
+            <tr>
+                <td><b>{{ x.name }}</b></td>
+                <td>KSh {{ x.rate_per_kwh|floatformat:2 }}/kWh</td>
+                <td>{{ x.effective_from|date:"Y-m-d" }}</td>
+                <td>{{ x.effective_to|date:"Y-m-d"|default:"Open" }}</td>
+                <td>{{ x.is_active|yesno:"Active,Inactive" }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5" class="text-center muted py-5">No records yet.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

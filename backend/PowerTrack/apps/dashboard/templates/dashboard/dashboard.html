@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}Dashboard • PowerTrack{% endblock %}
+{% block page_heading %}Dashboard{% endblock %}
+{% block content %}
+<div class="eyebrow">POWERTRACK COMMAND CENTRE</div>
+<p class="page-description">Live visibility across meters, consumption, billing and collections.</p>
+
+<div class="row g-3 mt-1">
+{% for label,value,icon in metrics %}
+<div class="col-sm-6 col-xl-3">
+<div class="stat-card h-100">
+<div class="stat-icon"><i class="bi {{ icon }}"></i></div>
+<div class="stat-label">{{ label }}</div>
+<div class="stat-value">{{ value }}</div>
+</div>
+</div>
+{% endfor %}
+</div>
+
+<div class="row g-3 mt-1">
+<div class="col-lg-8">
+<div class="panel h-100">
+<div class="panel-heading">
+<div><div class="eyebrow">ENERGY</div><h3>Consumption Overview</h3></div>
+<button class="btn btn-sm btn-outline-secondary" onclick="refreshPowerTrackDashboard()">
+<i class="bi bi-arrow-clockwise"></i>
+</button>
+</div>
+<div class="chart-placeholder">
+<i class="bi bi-lightning-charge"></i>
+<span id="dashboard-refresh-status">Consumption analytics are ready.</span>
+</div>
+</div>
+</div>
+
+<div class="col-lg-4">
+<div class="panel h-100">
+<div class="panel-heading"><div><div class="eyebrow">FINANCE</div><h3>Collection</h3></div></div>
+<div class="finance-summary">
+<div><span>Billed</span><strong>{{ summary.total_billed }}</strong></div>
+<div><span>Collected</span><strong>{{ summary.total_paid }}</strong></div>
+<div><span>Outstanding</span><strong>{{ summary.outstanding }}</strong></div>
+</div>
+</div>
+</div>
+</div>
+
+<script>
+async function refreshPowerTrackDashboard() {
+    const target = document.getElementById("dashboard-refresh-status");
+    try {
+        const response = await fetch("{% url 'dashboard_data' %}", {
+            headers: {"X-Requested-With": "XMLHttpRequest"}
+        });
+        if (!response.ok) throw new Error("Request failed");
+        const data = await response.json();
+        target.textContent =
+            `${data.total_consumption} kWh recorded across ${data.meter_count} meters.`;
+    } catch (error) {
+        target.textContent = "Unable to refresh dashboard data.";
+    }
+}
+</script>
+{% endblock %}

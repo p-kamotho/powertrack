@@ -1,0 +1,1 @@
+class PowerTrackError(Exception): pass

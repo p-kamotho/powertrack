@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Consumption Report • PowerTrack{% endblock %}
+{% block page_heading %}Consumption Report{% endblock %}
+{% block content %}
+<div class="page-toolbar">
+<div><div class="eyebrow">ENERGY REPORT</div><p class="page-description">Detailed meter consumption history.</p></div>
+<a class="btn btn-primary" href="{% url 'consumption_csv' %}"><i class="bi bi-download"></i> Export CSV</a>
+</div>
+<div class="panel">
+<div class="table-responsive">
+<table class="table power-table">
+<thead><tr><th>Meter</th><th>Period</th><th>Previous</th><th>Current</th><th>Consumption</th><th>Date</th></tr></thead>
+<tbody>
+{% for reading in rows %}
+<tr>
+<td>{{ reading.meter.meter_number }}</td>
+<td>{{ reading.period.name }}</td>
+<td>{{ reading.previous_reading }}</td>
+<td>{{ reading.reading_value }}</td>
+<td><strong>{{ reading.consumption }}</strong></td>
+<td>{{ reading.reading_date }}</td>
+</tr>
+{% empty %}
+<tr><td colspan="6" class="text-center py-5">No consumption data available.</td></tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+</div>
+{% endblock %}

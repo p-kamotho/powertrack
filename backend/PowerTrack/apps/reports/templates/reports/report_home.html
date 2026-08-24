@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}Reports • PowerTrack{% endblock %}
+{% block page_heading %}Reports{% endblock %}
+{% block content %}
+<div class="eyebrow">REPORTING CENTRE</div>
+<p class="page-description">Operational and financial intelligence from PowerTrack.</p>
+<div class="row g-3 mt-1">
+<div class="col-md-4"><div class="stat-card"><div class="stat-label">Consumption</div><div class="stat-value">{{ summary.consumption }} kWh</div></div></div>
+<div class="col-md-4"><div class="stat-card"><div class="stat-label">Total Billed</div><div class="stat-value">{{ summary.billed }}</div></div></div>
+<div class="col-md-4"><div class="stat-card"><div class="stat-label">Total Paid</div><div class="stat-value">{{ summary.paid }}</div></div></div>
+</div>
+<div class="panel mt-3">
+<div class="eyebrow">AVAILABLE REPORTS</div>
+<h3>PowerTrack Reporting</h3>
+<div class="d-flex gap-2 flex-wrap mt-3">
+<a class="btn btn-primary" href="{% url 'consumption_report' %}">Consumption Report</a>
+<a class="btn btn-outline-secondary" href="{% url 'consumption_csv' %}">Export CSV</a>
+</div>
+</div>
+{% endblock %}
