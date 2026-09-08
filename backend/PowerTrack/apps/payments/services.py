@@ -1,4 +1,4 @@
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
 
 from django.db import transaction
 
@@ -15,7 +15,16 @@ def record_payment(
     method,
     reference="",
 ):
-    amount = Decimal(str(amount))
+    """
+    Record a payment against a bill.
+
+    This is the single authoritative transaction path for payments.
+    """
+
+    try:
+        amount = Decimal(str(amount))
+    except (InvalidOperation, TypeError):
+        raise ValueError("Invalid payment amount.")
 
     if amount <= Decimal("0.00"):
         raise ValueError("Payment amount must be greater than zero.")
@@ -29,9 +38,10 @@ def record_payment(
     if bill.status == Bill.Status.CANCELLED:
         raise ValueError("Cannot pay a cancelled bill.")
 
-    # Calculate new balance
-    new_balance = bill.balance - amount
-    if new_balance < 0:
+    if bill.balance <= Decimal("0.00"):
+        raise ValueError("Bill has no outstanding balance.")
+
+    if amount > bill.balance:
         raise ValueError(
             f"Payment exceeds outstanding balance of {bill.balance}."
         )
@@ -43,9 +53,8 @@ def record_payment(
         reference=reference,
     )
 
-    # Update bill amount paid and save (triggers recalculation of balance and status)
     bill.amount_paid += amount
-    bill.save()  # This will recalculate balance and status in the save() method
+    bill.save()
 
     create_payment_notification(payment)
 

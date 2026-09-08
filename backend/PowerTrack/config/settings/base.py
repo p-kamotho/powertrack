@@ -60,3 +60,12 @@ REST_FRAMEWORK={"DEFAULT_PERMISSION_CLASSES":["rest_framework.permissions.IsAuth
 "DEFAULT_AUTHENTICATION_CLASSES":["rest_framework.authentication.SessionAuthentication"]}
 CELERY_BROKER_URL=config("REDIS_URL",default="redis://127.0.0.1:6379/0")
 CELERY_RESULT_BACKEND=CELERY_BROKER_URL
+
+CELERY_TIMEZONE = TIME_ZONE
+
+CELERY_BEAT_SCHEDULE = {
+    "process-overdue-bills-daily": {
+        "task": "apps.billing.tasks.process_overdue_bills_task",
+        "schedule": 86400.0,
+    },
+}

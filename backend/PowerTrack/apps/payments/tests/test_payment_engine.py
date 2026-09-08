@@ -12,10 +12,10 @@ from apps.payments.models import Payment
 from apps.payments.services import record_payment
 
 
-@pytest.mark.django_db
-def test_payment_updates_bill():
+@pytest.fixture
+def bill():
     property_obj = Property.objects.create(
-        name="Test Property"
+        name="Test Property",
     )
 
     room = Room.objects.create(
@@ -55,7 +55,7 @@ def test_payment_updates_bill():
         effective_from=date(2026, 1, 1),
     )
 
-    bill = Bill.objects.create(
+    return Bill.objects.create(
         bill_number="BILL-TEST-001",
         tenant=tenant,
         reading=reading,
@@ -63,6 +63,9 @@ def test_payment_updates_bill():
         tariff=tariff,
     )
 
+
+@pytest.mark.django_db
+def test_partial_payment_updates_bill(bill):
     payment, updated_bill = record_payment(
         bill=bill,
         amount=Decimal("500.00"),
@@ -76,3 +79,110 @@ def test_payment_updates_bill():
     assert updated_bill.amount_paid == Decimal("500.00")
     assert updated_bill.balance == Decimal("500.00")
     assert updated_bill.status == Bill.Status.PARTIAL
+
+
+@pytest.mark.django_db
+def test_multiple_payments_complete_bill(bill):
+    first_payment, updated_bill = record_payment(
+        bill=bill,
+        amount=Decimal("500.00"),
+        method=Payment.Method.MPESA,
+        reference="MPESA-TEST-001",
+    )
+
+    second_payment, updated_bill = record_payment(
+        bill=updated_bill,
+        amount=Decimal("500.00"),
+        method=Payment.Method.CASH,
+        reference="CASH-TEST-001",
+    )
+
+    updated_bill.refresh_from_db()
+
+    assert first_payment.amount == Decimal("500.00")
+    assert second_payment.amount == Decimal("500.00")
+
+    assert Payment.objects.filter(bill=updated_bill).count() == 2
+    assert updated_bill.amount_paid == Decimal("1000.00")
+    assert updated_bill.balance == Decimal("0.00")
+    assert updated_bill.status == Bill.Status.PAID
+
+
+@pytest.mark.django_db
+def test_zero_payment_rejected(bill):
+    with pytest.raises(ValueError, match="greater than zero"):
+        record_payment(
+            bill=bill,
+            amount=Decimal("0.00"),
+            method=Payment.Method.CASH,
+        )
+
+    assert Payment.objects.count() == 0
+
+
+@pytest.mark.django_db
+def test_negative_payment_rejected(bill):
+    with pytest.raises(ValueError, match="greater than zero"):
+        record_payment(
+            bill=bill,
+            amount=Decimal("-100.00"),
+            method=Payment.Method.CASH,
+        )
+
+    assert Payment.objects.count() == 0
+
+
+@pytest.mark.django_db
+def test_overpayment_rejected(bill):
+    with pytest.raises(ValueError, match="exceeds outstanding balance"):
+        record_payment(
+            bill=bill,
+            amount=Decimal("1001.00"),
+            method=Payment.Method.CASH,
+        )
+
+    bill.refresh_from_db()
+
+    assert Payment.objects.count() == 0
+    assert bill.amount_paid == Decimal("0.00")
+    assert bill.balance == Decimal("1000.00")
+    assert bill.status == Bill.Status.ISSUED
+
+
+@pytest.mark.django_db
+def test_cancelled_bill_cannot_be_paid(bill):
+    bill.status = Bill.Status.CANCELLED
+    bill.save(update_fields=["status"])
+
+    with pytest.raises(ValueError, match="cancelled bill"):
+        record_payment(
+            bill=bill,
+            amount=Decimal("100.00"),
+            method=Payment.Method.CASH,
+        )
+
+    assert Payment.objects.count() == 0
+
+
+@pytest.mark.django_db
+def test_fully_paid_bill_cannot_receive_more_payment(bill):
+    record_payment(
+        bill=bill,
+        amount=Decimal("1000.00"),
+        method=Payment.Method.MPESA,
+        reference="MPESA-FULL-001",
+    )
+
+    bill.refresh_from_db()
+
+    assert bill.status == Bill.Status.PAID
+    assert bill.balance == Decimal("0.00")
+
+    with pytest.raises(ValueError, match="no outstanding balance"):
+        record_payment(
+            bill=bill,
+            amount=Decimal("1.00"),
+            method=Payment.Method.CASH,
+        )
+
+    assert Payment.objects.count() == 1

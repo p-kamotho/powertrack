@@ -1,10 +1,10 @@
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
+
 from django.db import transaction
-from django.utils import timezone
 
 from apps.billing.models import Bill
 from apps.payments.models import Payment
-from apps.notifications.models import Notification
+from apps.notifications.services import queue_payment_notification
 
 
 @transaction.atomic
@@ -15,16 +15,38 @@ def record_payment(
     reference="",
 ):
     """
-    Record a payment and immediately synchronize the bill balance.
-    Returns a tuple of (payment, updated_bill).
+    Record a payment against a bill.
+
+    This is the authoritative payment transaction service.
+
+    Returns:
+        tuple: (payment, updated_bill)
     """
+
     if not isinstance(bill, Bill):
         raise TypeError("bill must be a Bill instance")
 
-    amount = Decimal(str(amount))
+    try:
+        amount = Decimal(str(amount))
+    except (InvalidOperation, TypeError, ValueError):
+        raise ValueError("Invalid payment amount.")
 
-    if amount <= 0:
+    if amount <= Decimal("0.00"):
         raise ValueError("Payment amount must be greater than zero.")
+
+    # Lock the bill so concurrent payment requests cannot
+    # modify the same financial record simultaneously.
+    bill = (
+        Bill.objects
+        .select_for_update()
+        .get(pk=bill.pk)
+    )
+
+    if bill.status == Bill.Status.CANCELLED:
+        raise ValueError("Cannot pay a cancelled bill.")
+
+    if bill.balance <= Decimal("0.00"):
+        raise ValueError("Bill has no outstanding balance.")
 
     if amount > bill.balance:
         raise ValueError(
@@ -38,41 +60,29 @@ def record_payment(
         reference=reference,
     )
 
-    # Recalculate amount paid from all payments
+    # Recalculate the total amount paid from the payment ledger.
     bill.amount_paid = sum(
-        (p.amount for p in bill.payments.all()),
+        (payment.amount for payment in bill.payments.all()),
         Decimal("0.00"),
     )
 
-    # Recalculate balance
-    bill.balance = bill.total_amount - bill.amount_paid
-    
-    # Update status based on payment
-    if bill.balance <= 0 and bill.total_amount > 0:
+    # Recalculate outstanding balance.
+    bill.balance = max(
+        Decimal("0.00"),
+        bill.total_amount - bill.amount_paid,
+    )
+
+    # Determine the bill's financial status.
+    if bill.balance <= Decimal("0.00") and bill.total_amount > Decimal("0.00"):
         bill.status = Bill.Status.PAID
-    elif bill.amount_paid > 0:
+    elif bill.amount_paid > Decimal("0.00"):
         bill.status = Bill.Status.PARTIAL
     else:
         bill.status = Bill.Status.ISSUED
 
     bill.save()
 
-    # Create payment notification
-    tenant = bill.tenant
-    Notification.objects.create(
-        tenant=tenant,
-        bill=bill,
-        channel="EMAIL",
-        subject=f"Payment Received - {bill.bill_number}",
-        message=(
-            f"Dear {tenant.full_name},\n\n"
-            f"Payment of KSh {amount} has been received for "
-            f"bill {bill.bill_number}.\n\n"
-            f"Amount paid: KSh {bill.amount_paid}\n"
-            f"Outstanding balance: KSh {bill.balance}\n\n"
-            f"Thank you."
-        ),
-        status="QUEUED",
-    )
+    # Queue payment notification.
+    queue_payment_notification(payment)
 
     return payment, bill
