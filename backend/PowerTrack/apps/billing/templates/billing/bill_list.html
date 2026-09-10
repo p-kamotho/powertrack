@@ -1,1 +1,84 @@
-{% extends "base.html" %}{% block title %}Bills • PowerTrack{% endblock %}{% block page_heading %}Bills{% endblock %}{% block content %}<div class="bar"><div><small>MANAGEMENT</small><p class="muted">Manage bills.</p></div><a class="btn btn-primary" href="{% url "bill_create" %}">+ Add</a></div><div class="panel table-responsive"><table class="table table-dark table-hover"><thead><tr><th>Bill</th><th>Tenant</th><th>Period</th><th>Usage</th><th>Total</th><th>Balance</th><th>Status</th></tr></thead><tbody>{% for x in bills %}<tr><td><b>{{ x.bill_number }}</b></td><td>{{ x.tenant.full_name }}</td><td>{{ x.billing_period.name }}</td><td>{{ x.consumption }} kWh</td><td>KSh {{ x.total_amount }}</td><td>KSh {{ x.balance }}</td><td>{{ x.get_status_display }}</td></tr>{% empty %}<tr><td colspan="7" class="text-center muted py-5">No records yet.</td></tr>{% endfor %}</tbody></table></div>{% endblock %}
+{% extends "base.html" %}
+
+{% block title %}Bills • PowerTrack{% endblock %}
+{% block page_heading %}Billing{% endblock %}
+
+{% block content %}
+
+<div class="bar">
+    <div>
+        <div class="eyebrow">FINANCE</div>
+        <p class="page-description">Review generated bills, balances and payment status.</p>
+    </div>
+
+    <a class="btn btn-primary" href="{% url 'bill_create' %}">
+        <i class="bi bi-plus-lg"></i>
+        Create Bill
+    </a>
+</div>
+
+<div class="panel table-responsive">
+
+<table class="table table-hover">
+
+<thead>
+<tr>
+    <th>Bill</th>
+    <th>Tenant</th>
+    <th>Period</th>
+    <th>Usage</th>
+    <th>Total</th>
+    <th>Balance</th>
+    <th>Status</th>
+</tr>
+</thead>
+
+<tbody>
+
+{% for x in bills %}
+
+<tr>
+    <td><b>{{ x.bill_number }}</b></td>
+    <td>{{ x.tenant.full_name }}</td>
+    <td>{{ x.billing_period.name }}</td>
+    <td>{{ x.consumption|floatformat:2 }} kWh</td>
+    <td><strong>KSh {{ x.total_amount|floatformat:2 }}</strong></td>
+    <td>KSh {{ x.balance|floatformat:2 }}</td>
+
+    <td>
+        {% if x.status == "PAID" %}
+            <span class="status-badge status-paid">Paid</span>
+        {% elif x.status == "PARTIAL" %}
+            <span class="status-badge status-partial">Partial</span>
+        {% elif x.status == "OVERDUE" %}
+            <span class="status-badge status-overdue">Overdue</span>
+        {% elif x.status == "CANCELLED" %}
+            <span class="status-badge status-cancelled">Cancelled</span>
+        {% else %}
+            <span class="status-badge status-open">{{ x.get_status_display }}</span>
+        {% endif %}
+    </td>
+</tr>
+
+{% empty %}
+
+<tr>
+<td colspan="7">
+    <div class="empty-state">
+        <div class="empty-state-icon">
+            <i class="bi bi-receipt"></i>
+        </div>
+        <h4>No bills yet</h4>
+        <p>Generated bills will appear here.</p>
+    </div>
+</td>
+</tr>
+
+{% endfor %}
+
+</tbody>
+</table>
+
+</div>
+
+{% endblock %}

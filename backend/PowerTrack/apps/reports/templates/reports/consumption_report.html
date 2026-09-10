@@ -1,30 +1,112 @@
 {% extends "base.html" %}
+
 {% block title %}Consumption Report • PowerTrack{% endblock %}
 {% block page_heading %}Consumption Report{% endblock %}
+
 {% block content %}
+
 <div class="page-toolbar">
-<div><div class="eyebrow">ENERGY REPORT</div><p class="page-description">Detailed meter consumption history.</p></div>
-<a class="btn btn-primary" href="{% url 'consumption_csv' %}"><i class="bi bi-download"></i> Export CSV</a>
+
+    <div>
+        <div class="eyebrow">ENERGY REPORT</div>
+        <p class="page-description">
+            Detailed meter consumption history.
+        </p>
+    </div>
+
+    <a
+        class="btn btn-primary"
+        href="{% url 'consumption_csv' %}"
+    >
+        <i class="bi bi-download"></i>
+        Export CSV
+    </a>
+
 </div>
+
 <div class="panel">
-<div class="table-responsive">
-<table class="table power-table">
-<thead><tr><th>Meter</th><th>Period</th><th>Previous</th><th>Current</th><th>Consumption</th><th>Date</th></tr></thead>
-<tbody>
-{% for reading in rows %}
-<tr>
-<td>{{ reading.meter.meter_number }}</td>
-<td>{{ reading.period.name }}</td>
-<td>{{ reading.previous_reading }}</td>
-<td>{{ reading.reading_value }}</td>
-<td><strong>{{ reading.consumption }}</strong></td>
-<td>{{ reading.reading_date }}</td>
-</tr>
-{% empty %}
-<tr><td colspan="6" class="text-center py-5">No consumption data available.</td></tr>
-{% endfor %}
-</tbody>
-</table>
+
+    <div class="table-responsive">
+
+        <table class="table power-table table-hover">
+
+            <thead>
+                <tr>
+                    <th>Meter</th>
+                    <th>Period</th>
+                    <th>Previous</th>
+                    <th>Current</th>
+                    <th>Consumption</th>
+                    <th>Date</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                {% for reading in rows %}
+
+                <tr>
+
+                    <td>
+                        <b>{{ reading.meter_number }}</b>
+                    </td>
+
+                    <td>
+                        {{ reading.billing_period }}
+                    </td>
+
+                    <td>
+                        {{ reading.previous_reading }}
+                    </td>
+
+                    <td>
+                        {{ reading.current_reading }}
+                    </td>
+
+                    <td>
+                        <strong class="text-green">
+                            {{ reading.consumption }} kWh
+                        </strong>
+                    </td>
+
+                    <td>
+                        {{ reading.reading_date }}
+                    </td>
+
+                </tr>
+
+                {% empty %}
+
+                <tr>
+
+                    <td colspan="6">
+
+                        <div class="empty-state">
+
+                            <div class="empty-state-icon">
+                                <i class="bi bi-bar-chart-line"></i>
+                            </div>
+
+                            <h4>No consumption data</h4>
+
+                            <p>
+                                Meter readings will appear here once consumption data is available.
+                            </p>
+
+                        </div>
+
+                    </td>
+
+                </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
 </div>
-</div>
+
 {% endblock %}

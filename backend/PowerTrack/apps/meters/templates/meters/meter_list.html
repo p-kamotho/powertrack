@@ -4,40 +4,85 @@
 {% block page_heading %}Meters{% endblock %}
 
 {% block content %}
+
 <div class="bar">
     <div>
-        <small>MANAGEMENT</small>
-        <p class="muted">Manage meters.</p>
+        <div class="eyebrow">ENERGY MANAGEMENT</div>
+        <p class="page-description">Monitor and manage installed electricity meters.</p>
     </div>
-    <a class="btn btn-primary" href="{% url 'meter_create' %}">+ Add</a>
+
+    <a class="btn btn-primary" href="{% url 'meter_create' %}">
+        <i class="bi bi-plus-lg"></i>
+        Add Meter
+    </a>
 </div>
 
 <div class="panel table-responsive">
-    <table class="table table-dark table-hover">
-        <thead>
-            <tr>
-                <th>Meter</th>
-                <th>Room</th>
-                <th>Property</th>
-                <th>Status</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for x in meters %}
-            <tr>
-                <!-- Updated meter_number to serial_number to match earlier models -->
-                <td><b>{{ x.serial_number }}</b></td>
-                <!-- Updated room_number to number -->
-                <td>{{ x.room.number|default:'Unassigned' }}</td>
-                <td>{{ x.room.property.name|default:'—' }}</td>
-                <td>{{ x.get_status_display }}</td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="4" class="text-center muted py-5">No records yet.</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+
+<table class="table table-hover">
+
+<thead>
+<tr>
+    <th>Meter</th>
+    <th>Room</th>
+    <th>Property</th>
+    <th>Status</th>
+</tr>
+</thead>
+
+<tbody>
+
+{% for x in meters %}
+
+<tr>
+    <td><b>{{ x.meter_number }}</b></td>
+
+    <td>
+        {% if x.room %}
+            {{ x.room.room_number }}
+        {% else %}
+            <span class="muted">Unassigned</span>
+        {% endif %}
+    </td>
+
+    <td>
+        {% if x.room %}
+            {{ x.room.property.name }}
+        {% else %}
+            —
+        {% endif %}
+    </td>
+
+    <td>
+        {% if x.status == "ACTIVE" %}
+            <span class="status-badge status-active">Active</span>
+        {% elif x.status == "FAULTY" %}
+            <span class="status-badge status-faulty">Faulty</span>
+        {% else %}
+            <span class="status-badge status-inactive">Inactive</span>
+        {% endif %}
+    </td>
+</tr>
+
+{% empty %}
+
+<tr>
+<td colspan="4">
+    <div class="empty-state">
+        <div class="empty-state-icon">
+            <i class="bi bi-speedometer2"></i>
+        </div>
+        <h4>No meters yet</h4>
+        <p>Install or register a meter to begin tracking consumption.</p>
+    </div>
+</td>
+</tr>
+
+{% endfor %}
+
+</tbody>
+</table>
+
 </div>
+
 {% endblock %}

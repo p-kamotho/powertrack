@@ -1,21 +1,275 @@
 {% load static %}
-<!doctype html><html lang="en" data-bs-theme="dark"><head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>{% block title %}PowerTrack{% endblock %}</title>
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
-<link rel="stylesheet" href="{% static 'css/powertrack.css' %}"></head>
-<body><div class="app">
-{% if user.is_authenticated %}<aside class="sidebar"><div class="brand"><b>⚡</b> Power<span>Track</span></div><div class="caption">CONTROL CENTER</div>
-<nav class="nav flex-column">
-<a href="{% url 'dashboard' %}"><i class="bi bi-grid"></i> Dashboard</a><a href="{% url 'property_list' %}"><i class="bi bi-buildings"></i> Properties</a>
-<a href="{% url 'room_list' %}"><i class="bi bi-door-open"></i> Rooms</a><a href="{% url 'tenant_list' %}"><i class="bi bi-people"></i> Tenants</a>
-<a href="{% url 'meter_list' %}"><i class="bi bi-speedometer2"></i> Meters</a><a href="{% url 'reading_list' %}"><i class="bi bi-activity"></i> Readings</a>
-<a href="{% url 'period_list' %}"><i class="bi bi-calendar3"></i> Billing periods</a><a href="{% url 'tariff_list' %}"><i class="bi bi-cash-stack"></i> Tariffs</a>
-<a href="{% url 'bill_list' %}"><i class="bi bi-receipt"></i> Billing</a><a href="{% url 'payment_list' %}"><i class="bi bi-wallet2"></i> Payments</a>
-<a href="{% url 'notification_list' %}"><i class="bi bi-bell"></i> Notifications</a><a href="{% url 'report_home' %}"><i class="bi bi-bar-chart"></i> Reports</a>
-<a href="/admin/"><i class="bi bi-shield-lock"></i> Admin</a></nav><div class="mt-auto"><small class="muted">{{ user.username }} • {{ user.get_role_display }}</small>
-<form method="post" action="{% url 'logout' %}">{% csrf_token %}<button class="btn btn-outline-light btn-sm w-100 mt-2">Sign out</button></form></div></aside>{% endif %}
-<main class="{% if user.is_authenticated %}main{% else %}auth{% endif %}">{% if user.is_authenticated %}<header><div><small>POWER MANAGEMENT</small><h1>{% block page_heading %}PowerTrack{% endblock %}</h1></div><span class="online">● System online</span></header>{% endif %}
-<section class="content">{% block content %}{% endblock %}</section></main></div>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script><script src="{% static 'js/powertrack.js' %}"></script></body></html>
+<!doctype html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>{% block title %}PowerTrack{% endblock %}</title>
+
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+    >
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"
+        rel="stylesheet"
+    >
+    <link rel="stylesheet" href="{% static 'css/powertrack.css' %}">
+</head>
+
+<body>
+
+{% if user.is_authenticated %}
+
+<div class="app-shell">
+
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="powerSidebar">
+
+        <div class="sidebar-top">
+
+            <a href="{% url 'dashboard' %}" class="brand">
+                <span class="brand-mark">
+                    <i class="bi bi-lightning-charge-fill"></i>
+                </span>
+
+                <span class="brand-name">
+                    Power<span>Track</span>
+                </span>
+            </a>
+
+            <button
+                type="button"
+                class="mobile-sidebar-close"
+                id="closeSidebar"
+                aria-label="Close navigation"
+            >
+                <i class="bi bi-x-lg"></i>
+            </button>
+
+        </div>
+
+        <div class="sidebar-section-label">
+            CONTROL CENTER
+        </div>
+
+        <nav class="sidebar-nav">
+
+            <a href="{% url 'dashboard' %}" class="nav-item">
+                <i class="bi bi-grid-1x2-fill"></i>
+                <span>Dashboard</span>
+            </a>
+
+            <a href="{% url 'property_list' %}" class="nav-item">
+                <i class="bi bi-buildings"></i>
+                <span>Properties</span>
+            </a>
+
+            <a href="{% url 'room_list' %}" class="nav-item">
+                <i class="bi bi-door-open"></i>
+                <span>Rooms</span>
+            </a>
+
+            <a href="{% url 'tenant_list' %}" class="nav-item">
+                <i class="bi bi-people"></i>
+                <span>Tenants</span>
+            </a>
+
+            <div class="nav-divider"></div>
+
+            <div class="sidebar-section-label nav-label-small">
+                ENERGY
+            </div>
+
+            <a href="{% url 'meter_list' %}" class="nav-item">
+                <i class="bi bi-speedometer2"></i>
+                <span>Meters</span>
+            </a>
+
+            <a href="{% url 'reading_list' %}" class="nav-item">
+                <i class="bi bi-activity"></i>
+                <span>Readings</span>
+            </a>
+
+            <a href="{% url 'period_list' %}" class="nav-item">
+                <i class="bi bi-calendar3"></i>
+                <span>Billing Periods</span>
+            </a>
+
+            <a href="{% url 'tariff_list' %}" class="nav-item">
+                <i class="bi bi-cash-stack"></i>
+                <span>Tariffs</span>
+            </a>
+
+            <div class="nav-divider"></div>
+
+            <div class="sidebar-section-label nav-label-small">
+                FINANCE
+            </div>
+
+            <a href="{% url 'bill_list' %}" class="nav-item">
+                <i class="bi bi-receipt"></i>
+                <span>Billing</span>
+            </a>
+
+            <a href="{% url 'payment_list' %}" class="nav-item">
+                <i class="bi bi-wallet2"></i>
+                <span>Payments</span>
+            </a>
+
+            <a href="{% url 'notification_list' %}" class="nav-item">
+                <i class="bi bi-bell"></i>
+                <span>Notifications</span>
+            </a>
+
+            <a href="{% url 'report_home' %}" class="nav-item">
+                <i class="bi bi-bar-chart-line"></i>
+                <span>Reports</span>
+            </a>
+
+            <div class="nav-divider"></div>
+
+            <a href="/admin/" class="nav-item">
+                <i class="bi bi-shield-lock"></i>
+                <span>Admin</span>
+            </a>
+
+        </nav>
+
+        <div class="sidebar-bottom">
+
+            <div class="system-status">
+
+                <span class="status-dot"></span>
+
+                <div>
+                    <strong>System online</strong>
+                    <small>PowerTrack services active</small>
+                </div>
+
+            </div>
+
+            <div class="user-panel">
+
+                <div class="user-avatar">
+                    {{ user.username|first|upper }}
+                </div>
+
+                <div class="user-details">
+
+                    <strong>
+                        {{ user.username }}
+                    </strong>
+
+                    <small>
+                        {{ user.get_role_display }}
+                    </small>
+
+                </div>
+
+                <form method="post" action="{% url 'logout' %}">
+
+                    {% csrf_token %}
+
+                    <button
+                        type="submit"
+                        class="logout-button"
+                        title="Sign out"
+                    >
+                        <i class="bi bi-box-arrow-right"></i>
+                    </button>
+
+                </form>
+
+            </div>
+
+        </div>
+
+    </aside>
+
+    <!-- MAIN -->
+    <main class="main-area">
+
+        <header class="topbar">
+
+            <div class="topbar-left">
+
+                <button
+                    type="button"
+                    class="sidebar-toggle"
+                    id="openSidebar"
+                    aria-label="Open navigation"
+                >
+                    <i class="bi bi-list"></i>
+                </button>
+
+                <div>
+
+                    <div class="topbar-eyebrow">
+                        POWER MANAGEMENT
+                    </div>
+
+                    <h1>
+                        {% block page_heading %}PowerTrack{% endblock %}
+                    </h1>
+
+                </div>
+
+            </div>
+
+            <div class="topbar-right">
+
+                <div class="live-indicator">
+
+                    <span class="status-dot"></span>
+
+                    <span>
+                        System online
+                    </span>
+
+                </div>
+
+                <a
+                    href="{% url 'notification_list' %}"
+                    class="topbar-icon"
+                    title="Notifications"
+                >
+                    <i class="bi bi-bell"></i>
+                </a>
+
+            </div>
+
+        </header>
+
+        <section class="page-content">
+
+{% else %}
+
+    <main class="auth-shell">
+
+{% endif %}
+
+        {% block content %}{% endblock %}
+
+{% if user.is_authenticated %}
+
+        </section>
+
+    </main>
+
+</div>
+
+{% else %}
+
+    </main>
+
+{% endif %}
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="{% static 'js/powertrack.js' %}"></script>
+
+</body>
+</html>

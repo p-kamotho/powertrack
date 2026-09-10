@@ -11,3 +11,6 @@ htmlcov/
 .idea/
 .vscode/
 *.log
+
+# Celery Beat local scheduler files
+celerybeat-schedule*

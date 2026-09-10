@@ -1,44 +1,73 @@
 {% extends "base.html" %}
+
 {% block title %}Meter Readings • PowerTrack{% endblock %}
 {% block page_heading %}Meter Readings{% endblock %}
 
 {% block content %}
+
 <div class="bar">
     <div>
-        <small>MANAGEMENT</small>
-        <p class="muted">Manage meter readings.</p>
+        <div class="eyebrow">ENERGY MANAGEMENT</div>
+        <p class="page-description">Record and review meter consumption readings.</p>
     </div>
-    <a class="btn btn-primary" href="{% url 'reading_create' %}">+ Add</a>
+
+    <a class="btn btn-primary" href="{% url 'reading_create' %}">
+        <i class="bi bi-plus-lg"></i>
+        Add Reading
+    </a>
 </div>
 
 <div class="panel table-responsive">
-    <table class="table table-dark table-hover">
-        <thead>
-            <tr>
-                <th>Meter</th>
-                <th>Period</th>
-                <th>Date</th>
-                <th>Previous</th>
-                <th>Current</th>
-                <th>Usage</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for x in readings %}
-            <tr>
-                <td><b>{{ x.meter.meter_number }}</b></td>
-                <td>{{ x.billing_period.name }}</td>
-                <td>{{ x.reading_date|date:"Y-m-d" }}</td>
-                <td>{{ x.previous_reading|floatformat:0 }}</td>
-                <td>{{ x.current_reading|floatformat:0 }}</td>
-                <td><b>{{ x.consumption|floatformat:0 }} kWh</b></td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="6" class="text-center muted py-5">No records yet.</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+
+<table class="table table-hover">
+
+<thead>
+<tr>
+    <th>Meter</th>
+    <th>Period</th>
+    <th>Date</th>
+    <th>Previous</th>
+    <th>Current</th>
+    <th>Consumption</th>
+</tr>
+</thead>
+
+<tbody>
+
+{% for x in readings %}
+
+<tr>
+    <td><b>{{ x.meter.meter_number }}</b></td>
+    <td>{{ x.billing_period.name }}</td>
+    <td>{{ x.reading_date|date:"Y-m-d" }}</td>
+    <td>{{ x.previous_reading|floatformat:2 }}</td>
+    <td>{{ x.current_reading|floatformat:2 }}</td>
+    <td>
+        <strong class="text-green">
+            {{ x.consumption|floatformat:2 }} kWh
+        </strong>
+    </td>
+</tr>
+
+{% empty %}
+
+<tr>
+<td colspan="6">
+    <div class="empty-state">
+        <div class="empty-state-icon">
+            <i class="bi bi-activity"></i>
+        </div>
+        <h4>No readings yet</h4>
+        <p>Record a meter reading to begin calculating consumption.</p>
+    </div>
+</td>
+</tr>
+
+{% endfor %}
+
+</tbody>
+</table>
+
 </div>
+
 {% endblock %}

@@ -60,3 +60,12 @@ def test_overdue_task_does_not_duplicate_existing_overdue_notification(
     assert second["bills_marked_overdue"] == 0
 
     assert Notification.objects.filter(bill=bill).count() == 1
+
+
+@pytest.mark.django_db
+def test_process_notification_ignores_missing_notification():
+    from apps.notifications.tasks import process_notification
+
+    result = process_notification.apply(args=[999999]).get()
+
+    assert result is None

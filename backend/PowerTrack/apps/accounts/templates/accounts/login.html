@@ -1,1 +1,40 @@
-{% extends "base.html" %}{% block title %}Login • PowerTrack{% endblock %}{% block content %}<div class="login"><div class="brand justify-content-center mb-4"><b>⚡</b> Power<span>Track</span></div><small>SECURE ACCESS</small><h2>Welcome back</h2><p class="muted">Sign in to your power operations console.</p><form method="post">{% csrf_token %}{{ form.as_p }}<button class="btn btn-primary w-100">Sign in</button></form></div>{% endblock %}
+{% extends "base.html" %}
+
+{% block title %}Sign in • PowerTrack{% endblock %}
+
+{% block content %}
+
+<div class="login">
+
+    <div class="brand mb-4">
+        <span class="brand-mark">
+            <i class="bi bi-lightning-charge-fill"></i>
+        </span>
+
+        <span class="brand-name">
+            Power<span>Track</span>
+        </span>
+    </div>
+
+    <div class="eyebrow">SECURE ACCESS</div>
+
+    <h2>Welcome back</h2>
+
+    <p class="muted mb-4">
+        Sign in to your power operations console.
+    </p>
+
+    <form method="post">
+        {% csrf_token %}
+
+        {{ form.as_p }}
+
+        <button type="submit" class="btn btn-primary w-100 mt-2">
+            <i class="bi bi-box-arrow-in-right"></i>
+            Sign in
+        </button>
+    </form>
+
+</div>
+
+{% endblock %}

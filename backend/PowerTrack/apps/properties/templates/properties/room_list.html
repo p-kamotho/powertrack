@@ -4,40 +4,88 @@
 {% block page_heading %}Rooms{% endblock %}
 
 {% block content %}
+
 <div class="bar">
     <div>
-        <small>MANAGEMENT</small>
-        <p class="muted">Manage individual property rooms.</p>
+        <div class="eyebrow">PROPERTY MANAGEMENT</div>
+        <p class="page-description">Manage individual rooms and occupancy.</p>
     </div>
-    <a class="btn btn-primary" href="{% url 'room_create' %}">+ Add Room</a>
+
+    <a class="btn btn-primary" href="{% url 'room_create' %}">
+        <i class="bi bi-plus-lg"></i>
+        Add Room
+    </a>
 </div>
 
 <div class="panel table-responsive">
-    <table class="table table-dark table-hover">
-        <thead>
-            <tr>
-                <th>Room No.</th>
-                <th>Property</th>
-                <th>Tenant</th>
-                <th>Meter</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for x in rooms %}
-            <tr>
-                <td><b>{{ x.number }}</b></td>
-                <td>{{ x.property.name }}</td>
-                <!-- Fixed tenant tag layout with safety filter -->
-                <td>{{ x.tenant.full_name|default:'Vacant' }}</td>
-                <!-- Fixed meter tag layout with safety filter -->
-                <td>{{ x.meter.serial_number|default:'—' }}</td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="4" class="text-center muted py-5">No room records found.</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+
+<table class="table table-hover">
+
+<thead>
+<tr>
+    <th>Room</th>
+    <th>Property</th>
+    <th>Tenant</th>
+    <th>Meter</th>
+    <th>Status</th>
+</tr>
+</thead>
+
+<tbody>
+
+{% for x in rooms %}
+
+<tr>
+    <td><b>{{ x.room_number }}</b></td>
+
+    <td>{{ x.property.name }}</td>
+
+    <td>
+        {% if x.tenant %}
+            {{ x.tenant.full_name }}
+        {% else %}
+            <span class="muted">Vacant</span>
+        {% endif %}
+    </td>
+
+    <td>
+        {% if x.meter %}
+            {{ x.meter.meter_number }}
+        {% else %}
+            <span class="muted">Unassigned</span>
+        {% endif %}
+    </td>
+
+    <td>
+        {% if x.status == "OCCUPIED" %}
+            <span class="status-badge status-active">Occupied</span>
+        {% elif x.status == "MAINTENANCE" %}
+            <span class="status-badge status-warning">Maintenance</span>
+        {% else %}
+            <span class="status-badge status-open">Vacant</span>
+        {% endif %}
+    </td>
+</tr>
+
+{% empty %}
+
+<tr>
+<td colspan="5">
+    <div class="empty-state">
+        <div class="empty-state-icon">
+            <i class="bi bi-door-open"></i>
+        </div>
+        <h4>No rooms yet</h4>
+        <p>Add rooms to start assigning tenants and meters.</p>
+    </div>
+</td>
+</tr>
+
+{% endfor %}
+
+</tbody>
+</table>
+
 </div>
+
 {% endblock %}

@@ -4,37 +4,72 @@
 {% block page_heading %}Notifications{% endblock %}
 
 {% block content %}
+
 <div class="bar">
     <div>
-        <small>MANAGEMENT</small>
-        <p class="muted">Manage notifications.</p>
+        <div class="eyebrow">COMMUNICATIONS</div>
+        <p class="page-description">Monitor tenant notification delivery.</p>
     </div>
 </div>
 
 <div class="panel table-responsive">
-    <table class="table table-dark table-hover">
-        <thead>
-            <tr>
-                <th>Tenant</th>
-                <th>Channel</th>
-                <th>Status</th>
-                <th>Created</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for x in notifications %}
-            <tr>
-                <td><b>{{ x.tenant.full_name }}</b></td>
-                <td>{{ x.channel }}</td>
-                <td>{{ x.status }}</td>
-                <td>{{ x.created_at|date:"Y-m-d H:i" }}</td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="4" class="text-center muted py-5">No records yet.</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+
+<table class="table table-hover">
+
+<thead>
+<tr>
+    <th>Tenant</th>
+    <th>Channel</th>
+    <th>Status</th>
+    <th>Created</th>
+</tr>
+</thead>
+
+<tbody>
+
+{% for x in notifications %}
+
+<tr>
+    <td><b>{{ x.tenant.full_name }}</b></td>
+
+    <td>
+        <span class="status-badge status-open">
+            {{ x.channel }}
+        </span>
+    </td>
+
+    <td>
+        {% if x.status == "SENT" %}
+            <span class="status-badge status-sent">Sent</span>
+        {% elif x.status == "QUEUED" %}
+            <span class="status-badge status-queued">Queued</span>
+        {% else %}
+            <span class="status-badge status-overdue">{{ x.status }}</span>
+        {% endif %}
+    </td>
+
+    <td>{{ x.created_at|date:"Y-m-d H:i" }}</td>
+</tr>
+
+{% empty %}
+
+<tr>
+<td colspan="4">
+    <div class="empty-state">
+        <div class="empty-state-icon">
+            <i class="bi bi-bell"></i>
+        </div>
+        <h4>No notifications</h4>
+        <p>Tenant notifications will appear here as they are generated.</p>
+    </div>
+</td>
+</tr>
+
+{% endfor %}
+
+</tbody>
+</table>
+
 </div>
+
 {% endblock %}

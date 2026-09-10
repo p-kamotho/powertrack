@@ -1,64 +1,434 @@
 {% extends "base.html" %}
+
 {% block title %}Dashboard • PowerTrack{% endblock %}
 {% block page_heading %}Dashboard{% endblock %}
+
 {% block content %}
-<div class="eyebrow">POWERTRACK COMMAND CENTRE</div>
-<p class="page-description">Live visibility across meters, consumption, billing and collections.</p>
+
+<!-- =====================================================
+     DASHBOARD HEADER
+====================================================== -->
+
+<div class="mb-4">
+
+    <div class="eyebrow">
+        POWERTRACK COMMAND CENTRE
+    </div>
+
+    <p class="page-description">
+        Overview of your energy, billing and financial activity.
+    </p>
+
+</div>
+
+
+<!-- =====================================================
+     KPI CARDS
+====================================================== -->
+
+<div class="row g-3">
+
+    {% for label,value,icon in metrics %}
+
+    <div class="col-sm-6 col-xl-3">
+
+        <div class="stat-card h-100">
+
+            <div class="stat-icon">
+                <i class="bi {{ icon }}"></i>
+            </div>
+
+            <div class="stat-label">
+                {{ label }}
+            </div>
+
+            <div class="stat-value">
+                {{ value }}
+            </div>
+
+        </div>
+
+    </div>
+
+    {% endfor %}
+
+</div>
+
+
+<!-- =====================================================
+     MAIN ANALYTICS
+====================================================== -->
 
 <div class="row g-3 mt-1">
-{% for label,value,icon in metrics %}
-<div class="col-sm-6 col-xl-3">
-<div class="stat-card h-100">
-<div class="stat-icon"><i class="bi {{ icon }}"></i></div>
-<div class="stat-label">{{ label }}</div>
-<div class="stat-value">{{ value }}</div>
+
+
+    <!-- CONSUMPTION -->
+    <div class="col-xl-8">
+
+        <div class="panel h-100">
+
+            <div class="panel-heading">
+
+                <div>
+
+                    <div class="eyebrow">
+                        ENERGY
+                    </div>
+
+                    <h3>
+                        Consumption Trend
+                    </h3>
+
+                </div>
+
+
+                <div class="chart-ranges">
+
+                    <button
+                        type="button"
+                        class="chart-range"
+                    >
+                        7D
+                    </button>
+
+                    <button
+                        type="button"
+                        class="chart-range active"
+                    >
+                        30D
+                    </button>
+
+                    <button
+                        type="button"
+                        class="chart-range"
+                    >
+                        3M
+                    </button>
+
+                    <button
+                        type="button"
+                        class="chart-range"
+                    >
+                        6M
+                    </button>
+
+                    <button
+                        type="button"
+                        class="chart-range"
+                    >
+                        1Y
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <div class="chart-placeholder">
+
+                <i class="bi bi-lightning-charge"></i>
+
+                <span id="dashboard-refresh-status">
+                    Consumption analytics are ready.
+                </span>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- BILLING SUMMARY -->
+    <div class="col-xl-4">
+
+        <div class="panel h-100">
+
+            <div class="panel-heading">
+
+                <div>
+
+                    <div class="eyebrow">
+                        FINANCE
+                    </div>
+
+                    <h3>
+                        Billing Summary
+                    </h3>
+
+                </div>
+
+                <i class="bi bi-receipt text-green fs-5"></i>
+
+            </div>
+
+
+            <div class="finance-summary">
+
+                <div class="finance-row">
+
+                    <div class="finance-label">
+
+                        <i class="bi bi-lightning-charge"></i>
+
+                        <span>
+                            Total Consumption
+                        </span>
+
+                    </div>
+
+                    <div class="finance-value">
+                        {{ summary.total_consumption }} kWh
+                    </div>
+
+                </div>
+
+
+                <div class="finance-row">
+
+                    <div class="finance-label">
+
+                        <i class="bi bi-receipt"></i>
+
+                        <span>
+                            Total Billed
+                        </span>
+
+                    </div>
+
+                    <div class="finance-value">
+                        KSh {{ summary.total_billed }}
+                    </div>
+
+                </div>
+
+
+                <div class="finance-row">
+
+                    <div class="finance-label">
+
+                        <i class="bi bi-wallet2"></i>
+
+                        <span>
+                            Total Collected
+                        </span>
+
+                    </div>
+
+                    <div class="finance-value">
+                        KSh {{ summary.total_paid }}
+                    </div>
+
+                </div>
+
+
+                <div class="finance-row">
+
+                    <div class="finance-label">
+
+                        <i class="bi bi-exclamation-triangle"></i>
+
+                        <span>
+                            Outstanding
+                        </span>
+
+                    </div>
+
+                    <div class="finance-value warning">
+                        KSh {{ summary.outstanding }}
+                    </div>
+
+                </div>
+
+
+            </div>
+
+        </div>
+
+    </div>
+
 </div>
-</div>
-{% endfor %}
-</div>
+
+
+<!-- =====================================================
+     LOWER DASHBOARD
+====================================================== -->
 
 <div class="row g-3 mt-1">
-<div class="col-lg-8">
-<div class="panel h-100">
-<div class="panel-heading">
-<div><div class="eyebrow">ENERGY</div><h3>Consumption Overview</h3></div>
-<button class="btn btn-sm btn-outline-secondary" onclick="refreshPowerTrackDashboard()">
-<i class="bi bi-arrow-clockwise"></i>
-</button>
-</div>
-<div class="chart-placeholder">
-<i class="bi bi-lightning-charge"></i>
-<span id="dashboard-refresh-status">Consumption analytics are ready.</span>
-</div>
-</div>
+
+
+    <!-- RECENT ACTIVITY -->
+    <div class="col-xl-8">
+
+        <div class="panel">
+
+            <div class="panel-heading">
+
+                <div>
+
+                    <div class="eyebrow">
+                        ACTIVITY
+                    </div>
+
+                    <h3>
+                        Recent Activity
+                    </h3>
+
+                </div>
+
+                <a
+                    href="{% url 'bill_list' %}"
+                    class="btn btn-sm btn-outline-secondary"
+                >
+                    View all
+                    <i class="bi bi-arrow-right ms-1"></i>
+                </a>
+
+            </div>
+
+
+            <div class="activity-list">
+
+                <div class="activity-item">
+
+                    <div class="activity-icon">
+                        <i class="bi bi-receipt"></i>
+                    </div>
+
+                    <div class="activity-content">
+
+                        <strong>
+                            Billing activity
+                        </strong>
+
+                        <small>
+                            Current billing records are available.
+                        </small>
+
+                    </div>
+
+                    <div class="activity-amount">
+                        KSh {{ summary.total_billed }}
+                    </div>
+
+                </div>
+
+
+                <div class="activity-item">
+
+                    <div class="activity-icon">
+                        <i class="bi bi-wallet2"></i>
+                    </div>
+
+                    <div class="activity-content">
+
+                        <strong>
+                            Collections
+                        </strong>
+
+                        <small>
+                            Recorded payments across PowerTrack.
+                        </small>
+
+                    </div>
+
+                    <div class="activity-amount">
+                        KSh {{ summary.total_paid }}
+                    </div>
+
+                </div>
+
+
+                <div class="activity-item">
+
+                    <div class="activity-icon">
+                        <i class="bi bi-lightning-charge"></i>
+                    </div>
+
+                    <div class="activity-content">
+
+                        <strong>
+                            Energy consumption
+                        </strong>
+
+                        <small>
+                            Meter readings are available for analysis.
+                        </small>
+
+                    </div>
+
+                    <div class="activity-amount">
+                        {{ summary.total_consumption }} kWh
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- QUICK ACTIONS -->
+    <div class="col-xl-4">
+
+        <div class="panel">
+
+            <div class="panel-heading">
+
+                <div>
+
+                    <div class="eyebrow">
+                        OPERATIONS
+                    </div>
+
+                    <h3>
+                        Quick Actions
+                    </h3>
+
+                </div>
+
+                <i class="bi bi-lightning-charge text-green fs-5"></i>
+
+            </div>
+
+
+            <div class="quick-actions">
+
+                <a
+                    href="{% url 'reading_list' %}"
+                    class="quick-action"
+                >
+                    <i class="bi bi-activity"></i>
+                    <strong>Readings</strong>
+                </a>
+
+
+                <a
+                    href="{% url 'bill_list' %}"
+                    class="quick-action"
+                >
+                    <i class="bi bi-receipt"></i>
+                    <strong>Billing</strong>
+                </a>
+
+
+                <a
+                    href="{% url 'payment_list' %}"
+                    class="quick-action"
+                >
+                    <i class="bi bi-wallet2"></i>
+                    <strong>Payments</strong>
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+
 </div>
 
-<div class="col-lg-4">
-<div class="panel h-100">
-<div class="panel-heading"><div><div class="eyebrow">FINANCE</div><h3>Collection</h3></div></div>
-<div class="finance-summary">
-<div><span>Billed</span><strong>{{ summary.total_billed }}</strong></div>
-<div><span>Collected</span><strong>{{ summary.total_paid }}</strong></div>
-<div><span>Outstanding</span><strong>{{ summary.outstanding }}</strong></div>
-</div>
-</div>
-</div>
-</div>
 
-<script>
-async function refreshPowerTrackDashboard() {
-    const target = document.getElementById("dashboard-refresh-status");
-    try {
-        const response = await fetch("{% url 'dashboard_data' %}", {
-            headers: {"X-Requested-With": "XMLHttpRequest"}
-        });
-        if (!response.ok) throw new Error("Request failed");
-        const data = await response.json();
-        target.textContent =
-            `${data.total_consumption} kWh recorded across ${data.meter_count} meters.`;
-    } catch (error) {
-        target.textContent = "Unable to refresh dashboard data.";
-    }
-}
-</script>
 {% endblock %}

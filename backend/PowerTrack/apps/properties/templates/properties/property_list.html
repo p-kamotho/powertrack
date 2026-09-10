@@ -4,40 +4,71 @@
 {% block page_heading %}Properties{% endblock %}
 
 {% block content %}
+
 <div class="bar">
     <div>
-        <small>MANAGEMENT</small>
-        <p class="muted">Manage properties.</p>
+        <div class="eyebrow">PROPERTY MANAGEMENT</div>
+        <p class="page-description">Manage properties and their locations.</p>
     </div>
-    <a class="btn btn-primary" href="{% url 'property_create' %}">+ Add</a>
+
+    <a class="btn btn-primary" href="{% url 'property_create' %}">
+        <i class="bi bi-plus-lg"></i>
+        Add Property
+    </a>
 </div>
 
 <div class="panel table-responsive">
-    <table class="table table-dark table-hover">
-        <thead>
-            <tr>
-                <th>Property</th>
-                <th>Address</th>
-                <th>Rooms</th>
-                <th>Status</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for x in properties %}
-            <tr>
-                <td><b>{{ x.name }}</b></td>
-                <!-- Fixed address tag layout with filter -->
-                <td>{{ x.address|default:'—' }}</td>
-                <td>{{ x.rooms.count }}</td>
-                <!-- Fixed status tag layout with filter -->
-                <td>{{ x.is_active|yesno:'Active,Inactive' }}</td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="4" class="text-center muted py-5">No records yet.</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+
+<table class="table table-hover">
+
+<thead>
+<tr>
+    <th>Property</th>
+    <th>Address</th>
+    <th>Rooms</th>
+    <th>Status</th>
+</tr>
+</thead>
+
+<tbody>
+
+{% for x in properties %}
+
+<tr>
+    <td><b>{{ x.name }}</b></td>
+
+    <td>{{ x.address|default:"—" }}</td>
+
+    <td>{{ x.rooms.count }}</td>
+
+    <td>
+        {% if x.is_active %}
+            <span class="status-badge status-active">Active</span>
+        {% else %}
+            <span class="status-badge status-inactive">Inactive</span>
+        {% endif %}
+    </td>
+</tr>
+
+{% empty %}
+
+<tr>
+<td colspan="4">
+    <div class="empty-state">
+        <div class="empty-state-icon">
+            <i class="bi bi-buildings"></i>
+        </div>
+        <h4>No properties yet</h4>
+        <p>Add your first property to begin managing PowerTrack operations.</p>
+    </div>
+</td>
+</tr>
+
+{% endfor %}
+
+</tbody>
+</table>
+
 </div>
+
 {% endblock %}
